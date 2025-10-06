@@ -1,5 +1,7 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { MOVIE_REPO, MovieRepository } from "../../domain/repositories/movie.repository";
+import { MOVIE_REPO } from "../../domain/repositories/movie.repository"; // MOVIE_REPO เป็น value (symbol)
+import type { MovieRepository } from "../../domain/repositories/movie.repository"; // MovieRepository เป็น type
+
 import { MovieSummary } from "../../domain/entities/movie";
 
 @Injectable()

@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query, Inject } from '@nestjs/common';
 import { GetFeaturedMoviesService } from '../../application/use-cases/get-featured-movies.service';
-import { MOVIE_REPO, MovieRepository }  from '../../domain/repositories/movie.repository';
+import { MOVIE_REPO } from "../../domain/repositories/movie.repository"; // MOVIE_REPO เป็น value (symbol)
+import type { MovieRepository } from "../../domain/repositories/movie.repository"; // MovieRepository เป็น type
 
 @Controller('api/movies')
 export class MoviesController {

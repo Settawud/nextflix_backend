@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
-import { MovieController } from './movies.controller';
+import { MoviesController } from './movies.controller';
 import { GetFeaturedMoviesService } from 'src/application/use-cases/get-featured-movies.service';
 import { TmdbClient } from 'src/infrastructure/tmdb/tmdb.client';
 import { movieRepoProvider } from 'src/infrastructure/tmdb/tmdb.movie.repository';
