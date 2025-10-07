@@ -7,10 +7,15 @@ import { AppModule } from './presentation/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const configuredOrigins =
+    process.env.FRONTEND_ORIGINS?.split(',')
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0) ?? [];
+
+  const defaultOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
   app.enableCors({
-    origin: process.env.FRONTEND_ORIGINS?.split(',').map((origin) =>
-      origin.trim(),
-    ) ?? ['http://localhost:3000'],
+    origin: configuredOrigins.length > 0 ? configuredOrigins : defaultOrigins,
     credentials: true,
   });
 
