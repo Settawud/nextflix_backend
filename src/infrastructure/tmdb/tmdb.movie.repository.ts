@@ -1,17 +1,59 @@
-import { Injectable } from "@nestjs/common";
-import { MOVIE_REPO, MovieRepository} from "../../domain/repositories/movie.repository";
-import { TmdbClient } from "./tmdb.client";
-import { MovieDetail, MovieSummary, toMovieDetail, toMovieSummary } from "../../domain/entities/movie";
+import { Injectable } from '@nestjs/common';
+
+import {
+  MovieDetail,
+  MovieSummary,
+  toMovieDetail,
+  toMovieSummary,
+} from '../../domain/entities/movie';
+import {
+  MOVIE_REPO,
+  MovieRepository,
+} from '../../domain/repositories/movie.repository';
+import { TmdbClient } from './tmdb.client';
+import {
+  TmdbMovieDetailResponse,
+  TmdbMovieSearchResponse,
+  TmdbMovieSummaryResponse,
+} from './tmdb.types';
 
 @Injectable()
 export class TmdbMovieRepository implements MovieRepository {
-    
-    constructor(private tmdb: TmdbClient) {}
+  constructor(private readonly tmdb: TmdbClient) {}
 
-    async trending(): Promise<MovieSummary[]> { const d = await this.tmdb.get('/trending/all/week'); return (d.results??[]).map(toMovieSummary); }
-    async topRated(): Promise<MovieSummary[]> { const d = await this.tmdb.get('/movie/top_rated'); return (d.results??[]).map(toMovieSummary); }
-    async nowPlaying(): Promise<MovieSummary[]> { const d = await this.tmdb.get('/movie/now_playing'); return (d.results??[]).map(toMovieSummary); }
-    async search(q:string, page:number) { const d = await this.tmdb.get('/search/movie', { query:q, page }); return (d.results??[]).map(toMovieSummary); }
-    async byId(id:number): Promise<MovieDetail> { const d = await this.tmdb.get(`/movie/${id}`); return toMovieDetail(d); }
+  async trending(): Promise<MovieSummary[]> {
+    const data =
+      await this.tmdb.get<TmdbMovieSummaryResponse>('/trending/all/week');
+    return (data.results ?? []).map(toMovieSummary);
+  }
+
+  async topRated(): Promise<MovieSummary[]> {
+    const data =
+      await this.tmdb.get<TmdbMovieSummaryResponse>('/movie/top_rated');
+    return (data.results ?? []).map(toMovieSummary);
+  }
+
+  async nowPlaying(): Promise<MovieSummary[]> {
+    const data =
+      await this.tmdb.get<TmdbMovieSummaryResponse>('/movie/now_playing');
+    return (data.results ?? []).map(toMovieSummary);
+  }
+
+  async search(query: string, page: number): Promise<MovieSummary[]> {
+    const data = await this.tmdb.get<TmdbMovieSearchResponse>('/search/movie', {
+      query,
+      page,
+    });
+    return (data.results ?? []).map(toMovieSummary);
+  }
+
+  async byId(id: number): Promise<MovieDetail> {
+    const data = await this.tmdb.get<TmdbMovieDetailResponse>(`/movie/${id}`);
+    return toMovieDetail(data);
+  }
 }
-export const movieRepoProvider = { provide: MOVIE_REPO, useClass: TmdbMovieRepository };
+
+export const movieRepoProvider = {
+  provide: MOVIE_REPO,
+  useClass: TmdbMovieRepository,
+};
