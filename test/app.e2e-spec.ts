@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../src/presentation/app.module';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -25,6 +25,6 @@ describe('AppController (e2e)', () => {
     const response = await request(server).get('/');
 
     expect(response.status).toBe(200);
-    expect(response.text).toBe('Hello World!');
+    expect(response.text).toContain('Server is online and running');
   });
 });
