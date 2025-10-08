@@ -1,98 +1,113 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Nextflix Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS API that aggregates data from The Movie Database (TMDB) and exposes clean endpoints for the Nextflix frontend. Features include curated rails, detail lookups, search, and rich asset retrieval (logo/textless backdrops) to support the title overlay experience.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Live Resources
 
-## Description
+- Base URL: https://nextflix-backend-j6ve.onrender.com
+- Health check: `GET /` (Nest default)
+- Featured movies: `GET /api/movies/featured`
+- Assets for a title: `GET /api/movies/{id}/assets`
+- Public frontend consuming this API: https://nextflix-frontend-hl577w1cq-settawuds-projects.vercel.app/
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tech Stack
 
-## Project setup
+- **Runtime**: Node.js 20, NestJS 11
+- **HTTP**: Axios via `@nestjs/axios`
+- **Architecture**: Clean layering (domain entities, use-cases, repository abstraction)
+- **Infrastructure**: TMDB REST integration with logo/backdrop selection heuristics
+- **Testing**: Jest unit tests for use-cases
 
-```bash
-$ npm install
+## Getting Started Locally
+
+1. Install dependencies
+
+   ```bash
+   npm install
+   ```
+
+2. Create an environment file
+
+   ```bash
+   cp .env.example .env
+   # fill in TMDB_BEARER with your TMDB API v4 access token
+   ```
+
+   | Variable | Purpose |
+   | --- | --- |
+   | `PORT` | API port (default 3001) |
+   | `TMDB_BASE_URL` | TMDB API root, usually `https://api.themoviedb.org/3` |
+   | `TMDB_BEARER` | TMDB API v4 token (required) |
+   | `FRONTEND_ORIGINS` | Comma-separated list for CORS (e.g. `http://localhost:3000`) |
+
+3. Start the server
+
+   ```bash
+   npm run start:dev
+   ```
+
+   The API will be available at http://localhost:3001.
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run start` | Production mode (compiled) |
+| `npm run start:dev` | Watch mode with hot-reload |
+| `npm run build` | Compile TypeScript to `dist/` |
+| `npm run lint` | ESLint with strict TypeScript rules |
+| `npm run test` | Jest unit tests |
+
+## Architecture Overview
+
+```
+src/
+  domain/
+    entities/         # MovieSummary, MovieDetail, MovieAssets types + mappers
+    repositories/     # MovieRepository interface (trending/top/now/detail/assets)
+  application/
+    use-cases/        # Orchestrate repository calls (e.g., GetFeaturedMoviesService)
+  infrastructure/
+    tmdb/             # TmdbClient for HTTP + TmdbMovieRepository implementation
+  presentation/
+    movies/           # Nest controller + module wiring endpoints
 ```
 
-## Compile and run the project
+- The repository interface hides TMDB specifics from the rest of the codebase.
+- `TmdbMovieRepository` enriches base data by selecting high-quality logos and textless backdrops.
+- The new `GetMovieAssetsService` powers `/api/movies/{id}/assets`, enabling the frontend to render branded overlays.
 
-```bash
-# development
-$ npm run start
+## API Surface
 
-# watch mode
-$ npm run start:dev
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/api/movies/featured` | Returns `{ trending, top, now }` rails |
+| `GET` | `/api/movies/trending` | Weekly trending titles |
+| `GET` | `/api/movies/top-rated` | Highest rated titles |
+| `GET` | `/api/movies/now-playing` | Currently playing titles |
+| `GET` | `/api/movies/search?q=...&page=...` | Search TMDB catalogue |
+| `GET` | `/api/movies/{id}` | Detailed metadata for a specific movie |
+| `GET` | `/api/movies/{id}/assets` | Logo, backdrop, and textless backdrops selection |
 
-# production mode
-$ npm run start:prod
-```
+All responses are JSON; errors return standard NestJS problem details. Upstream TMDB errors are logged (non-production) with safe metadata for easier debugging.
 
-## Run tests
+## Quality & Testing
 
-```bash
-# unit tests
-$ npm run test
+- **Lint**: `npm run lint` (ESLint strict rules, including `@typescript-eslint/no-unsafe-*`)
+- **Unit test**: `npm run test` (covers `GetFeaturedMoviesService`)
+- **Manual checks**:
+  - Verify `/api/movies/featured` returns 3 arrays with >0 items
+  - Hit `/api/movies/{id}/assets` and confirm `logoPath` / `textlessBackdropPath` values when available
+  - Exercise `/api/movies/search?q=inception`
 
-# e2e tests
-$ npm run test:e2e
+## Deployment Notes
 
-# test coverage
-$ npm run test:cov
-```
+- Hosted on **Render** (Node service). Build command `npm install && npm run build`, start command `npm run start`.
+- Ensure environment variables (`TMDB_BEARER`, `FRONTEND_ORIGINS`) are defined in Render dashboard.
+- CORS is controlled via `FRONTEND_ORIGINS` to allow the Vercel frontend.
 
-## Deployment
+## Roadmap Ideas
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- Cache TMDB responses (Redis) to reduce latency and API quota usage.
+- Add `/api/movies/{id}/highlights` to surface cast & crew featured on the UI.
+- Expand test coverage with integration tests (supertest) and contract snapshots.
