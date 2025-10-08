@@ -12,7 +12,7 @@ async function bootstrap() {
       .map((origin) => origin.trim())
       .filter((origin) => origin.length > 0) ?? [];
 
-  const defaultOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+  const defaultOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3002'];
 
   app.enableCors({
     origin: configuredOrigins.length > 0 ? configuredOrigins : defaultOrigins,
