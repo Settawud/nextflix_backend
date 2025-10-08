@@ -2,9 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { MovieRepository } from '../../domain/repositories/movie.repository';
 import { MOVIE_REPO } from '../../domain/repositories/movie.repository';
-import type { MovieSummary } from '../../domain/entities/movie';
+import type { MovieAssets, MovieDetail, MovieSummary } from '../../domain/entities/movie';
 
 type FeaturedRails = {
+  hero: {
+    detail: MovieDetail;
+    assets: MovieAssets | null;
+  } | null;
   trending: MovieSummary[];
   top: MovieSummary[];
   now: MovieSummary[];
@@ -20,6 +24,21 @@ export class GetFeaturedMoviesService {
       this.repo.topRated(),
       this.repo.nowPlaying(),
     ]);
-    return { trending, top, now };
+    const heroSummary = trending[0];
+
+    let hero: FeaturedRails['hero'] = null;
+
+    if (heroSummary) {
+      const [detail, assets] = await Promise.all([
+        this.repo.byId(heroSummary.id),
+        this.repo.assets(heroSummary.id),
+      ]);
+      hero = {
+        detail,
+        assets,
+      };
+    }
+
+    return { hero, trending, top, now };
   }
 }

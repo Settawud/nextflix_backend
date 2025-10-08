@@ -1,0 +1,223 @@
+openapi: 3.1.0
+info:
+  title: Nextflix API
+  description: |
+    REST endpoints exposed by the Nextflix backend. Import this file into Apidog
+    (or any OpenAPI compatible tool) to explore and document the movie catalogue
+    service. All endpoints respond with JSON unless noted otherwise.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+paths:
+  /api/movies/featured:
+    get:
+      summary: Get curated movie rails
+      description: Returns the three rails displayed on the home screen (trending, top rated, now playing) and the hero movie payload used for the masthead.
+      tags: [Movies]
+      responses:
+        '200':
+          description: Curated movie rails
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeaturedRails'
+  /api/movies/trending:
+    get:
+      summary: Get trending movies
+      tags: [Movies]
+      responses:
+        '200':
+          description: List of trending movies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovieSummary'
+  /api/movies/top-rated:
+    get:
+      summary: Get top rated movies
+      tags: [Movies]
+      responses:
+        '200':
+          description: List of top rated movies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovieSummary'
+  /api/movies/now-playing:
+    get:
+      summary: Get now playing movies
+      tags: [Movies]
+      responses:
+        '200':
+          description: List of currently playing movies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovieSummary'
+  /api/movies/search:
+    get:
+      summary: Search movies
+      tags: [Movies]
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+          description: Search keywords.
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number.
+      responses:
+        '200':
+          description: Matching movies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovieSummary'
+  /api/movies/{id}:
+    get:
+      summary: Get movie details
+      tags: [Movies]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Movie identifier.
+      responses:
+        '200':
+          description: Movie details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovieDetail'
+        '404':
+          description: Movie not found
+  /api/movies/{id}/assets:
+    get:
+      summary: Get movie marketing assets
+      tags: [Movies]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Movie identifier.
+      responses:
+        '200':
+          description: Movie asset bundle (or `null` when unavailable)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/MovieAssets'
+                  - type: 'null'
+        '404':
+          description: Movie not found
+components:
+  schemas:
+    HeroMovie:
+      type: object
+      nullable: true
+      required: [detail, assets]
+      properties:
+        detail:
+          $ref: '#/components/schemas/MovieDetail'
+        assets:
+          oneOf:
+            - $ref: '#/components/schemas/MovieAssets'
+            - type: 'null'
+    MovieSummary:
+      type: object
+      required: [id, title, posterPath, backdropPath, voteAverage]
+      properties:
+        id:
+          type: integer
+          example: 438631
+        title:
+          type: string
+          example: Dune
+        posterPath:
+          type: string
+          nullable: true
+          description: Poster image path relative to the configured CDN.
+          example: /abc123/poster.jpg
+        backdropPath:
+          type: string
+          nullable: true
+          example: /abc123/backdrop.jpg
+        voteAverage:
+          type: number
+          format: float
+          example: 8.2
+    MovieDetail:
+      allOf:
+        - $ref: '#/components/schemas/MovieSummary'
+        - type: object
+          required: [overview, releaseDate, genres]
+          properties:
+            overview:
+              type: string
+              example: Paul Atreides unites with Chani and the Fremen...
+            releaseDate:
+              type: string
+              nullable: true
+              format: date
+              example: 2024-10-08
+            genres:
+              type: array
+              items:
+                type: string
+              example: ["Science Fiction", "Adventure"]
+    MovieAssets:
+      type: object
+      required: [id, title, backdropPath, textlessBackdropPath, logoPath]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        backdropPath:
+          type: string
+          nullable: true
+        textlessBackdropPath:
+          type: string
+          nullable: true
+        logoPath:
+          type: string
+          nullable: true
+    FeaturedRails:
+      type: object
+      required: [hero, trending, top, now]
+      properties:
+        hero:
+          $ref: '#/components/schemas/HeroMovie'
+        trending:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovieSummary'
+        top:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovieSummary'
+        now:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovieSummary'
