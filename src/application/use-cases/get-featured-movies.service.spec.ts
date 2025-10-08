@@ -11,13 +11,25 @@ const sampleMovie: MovieSummary = {
 };
 
 describe('GetFeaturedMoviesService', () => {
-  it('aggregates three rails', async () => {
+  it('aggregates rails and hydrates hero', async () => {
     const mockRepo: MovieRepository = {
       trending: () => Promise.resolve([sampleMovie]),
       topRated: () => Promise.resolve([]),
       nowPlaying: () => Promise.resolve([]),
       search: () => Promise.resolve([]),
-      byId: () => Promise.reject(new Error('noop')),
+      byId: async () => ({
+        ...sampleMovie,
+        overview: 'Hello',
+        releaseDate: null,
+        genres: [],
+      }),
+      assets: async () => ({
+        id: sampleMovie.id,
+        title: sampleMovie.title,
+        backdropPath: null,
+        textlessBackdropPath: null,
+        logoPath: null,
+      }),
     };
 
     const service = new GetFeaturedMoviesService(mockRepo);
@@ -27,5 +39,6 @@ describe('GetFeaturedMoviesService', () => {
     expect(result.trending).toHaveLength(1);
     expect(result.top).toHaveLength(0);
     expect(result.now).toHaveLength(0);
+    expect(result.hero?.detail.id).toBe(sampleMovie.id);
   });
 });
