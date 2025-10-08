@@ -1,5 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { isAxiosError } from 'axios';
 
 @Injectable()
 export class TmdbClient {
@@ -16,22 +17,28 @@ export class TmdbClient {
         timeout: 5000,
       });
       return res.data;
-    } catch (error) {
+    } catch (error: unknown) {
       if (process.env.NODE_ENV !== 'production') {
-        console.error('[TMDB] request failed', {
+        const logPayload: {
+          path: string;
+          params: Record<string, unknown>;
+          message: string;
+          responseStatus?: number;
+          responseData?: unknown;
+        } = {
           path,
           params,
           message:
             error instanceof Error ? error.message : 'unknown tmdb error',
-          responseStatus:
-            typeof error === 'object' && error && 'response' in error
-              ? error.response?.status
-              : undefined,
-          responseData:
-            typeof error === 'object' && error && 'response' in error
-              ? error.response?.data
-              : undefined,
-        });
+        };
+
+        if (isAxiosError(error)) {
+          logPayload.message = error.message;
+          logPayload.responseStatus = error.response?.status;
+          logPayload.responseData = error.response?.data;
+        }
+
+        console.error('[TMDB] request failed', logPayload);
       }
       throw error;
     }
