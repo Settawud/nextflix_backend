@@ -9,6 +9,7 @@ NestJS API that aggregates data from The Movie Database (TMDB) and exposes clean
 - Featured movies: `GET /api/movies/featured`
 - Assets for a title: `GET /api/movies/{id}/assets`
 - Public frontend consuming this API: https://nextflix-frontend-hl577w1cq-settawuds-projects.vercel.app/
+- Public Apidog : https://jciw854cqv.apidog.io
 
 ## Tech Stack
 
