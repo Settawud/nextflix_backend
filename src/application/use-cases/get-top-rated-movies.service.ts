@@ -12,4 +12,3 @@ export class GetTopRatedMoviesService {
     return this.repo.topRated();
   }
 }
-

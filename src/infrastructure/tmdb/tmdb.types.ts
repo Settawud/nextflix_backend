@@ -1,5 +1,6 @@
 import type {
   MovieDetailSource,
+  MovieImagesSource,
   MovieSummarySource,
 } from '../../domain/entities/movie';
 
@@ -16,3 +17,5 @@ export type TmdbMovieSummaryResponse =
 export type TmdbMovieSearchResponse = TmdbPaginatedResponse<MovieSummarySource>;
 
 export type TmdbMovieDetailResponse = MovieDetailSource;
+
+export type TmdbMovieImagesResponse = MovieImagesSource;

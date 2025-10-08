@@ -12,6 +12,30 @@ export type MovieDetail = MovieSummary & {
   genres: string[];
 };
 
+export type MovieAssets = {
+  id: number;
+  title: string;
+  backdropPath: string | null;
+  textlessBackdropPath: string | null;
+  logoPath: string | null;
+};
+
+export type MovieImageAssetSource = {
+  iso_639_1?: string | null;
+  file_path?: string | null;
+  vote_average?: number | null;
+  vote_count?: number | null;
+  width?: number | null;
+  aspect_ratio?: number | null;
+};
+
+export type MovieImagesSource = {
+  id: number;
+  backdrops?: MovieImageAssetSource[];
+  posters?: MovieImageAssetSource[];
+  logos?: MovieImageAssetSource[];
+};
+
 export type MovieSummarySource = {
   id: number;
   title?: string | null;

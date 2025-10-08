@@ -18,7 +18,6 @@ export class TmdbClient {
       return res.data;
     } catch (error) {
       if (process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
         console.error('[TMDB] request failed', {
           path,
           params,
@@ -26,11 +25,11 @@ export class TmdbClient {
             error instanceof Error ? error.message : 'unknown tmdb error',
           responseStatus:
             typeof error === 'object' && error && 'response' in error
-              ? (error as any).response?.status
+              ? error.response?.status
               : undefined,
           responseData:
             typeof error === 'object' && error && 'response' in error
-              ? (error as any).response?.data
+              ? error.response?.data
               : undefined,
         });
       }

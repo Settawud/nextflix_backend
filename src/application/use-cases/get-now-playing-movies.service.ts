@@ -12,4 +12,3 @@ export class GetNowPlayingMoviesService {
     return this.repo.nowPlaying();
   }
 }
-

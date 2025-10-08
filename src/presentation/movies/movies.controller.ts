@@ -1,6 +1,7 @@
 import { Controller, Get, Inject, Param, Query } from '@nestjs/common';
 
 import { GetFeaturedMoviesService } from '../../application/use-cases/get-featured-movies.service';
+import { GetMovieAssetsService } from '../../application/use-cases/get-movie-assets.service';
 import { GetNowPlayingMoviesService } from '../../application/use-cases/get-now-playing-movies.service';
 import { GetTopRatedMoviesService } from '../../application/use-cases/get-top-rated-movies.service';
 import { GetTrendingMoviesService } from '../../application/use-cases/get-trending-movies.service';
@@ -14,6 +15,7 @@ export class MoviesController {
     private readonly trendingService: GetTrendingMoviesService,
     private readonly topRatedService: GetTopRatedMoviesService,
     private readonly nowPlayingService: GetNowPlayingMoviesService,
+    private readonly movieAssetsService: GetMovieAssetsService,
     @Inject(MOVIE_REPO) private readonly repo: MovieRepository,
   ) {}
 
@@ -21,7 +23,6 @@ export class MoviesController {
   featuredRails() {
     return this.featured.execute();
   }
-
 
   @Get('trending')
   trending() {
@@ -46,5 +47,10 @@ export class MoviesController {
   @Get(':id')
   byId(@Param('id') id: string) {
     return this.repo.byId(Number(id));
+  }
+
+  @Get(':id/assets')
+  assets(@Param('id') id: string) {
+    return this.movieAssetsService.execute(Number(id));
   }
 }
