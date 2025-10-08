@@ -1,10 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { MovieAssets } from '../../domain/entities/movie';
-import {
-  MOVIE_REPO,
-  MovieRepository,
-} from '../../domain/repositories/movie.repository';
+import { MOVIE_REPO } from '../../domain/repositories/movie.repository';
+import type { MovieRepository } from '../../domain/repositories/movie.repository';
 
 @Injectable()
 export class GetMovieAssetsService {
