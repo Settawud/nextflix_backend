@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import type { MovieRepository } from '../../domain/repositories/movie.repository';
 import { MOVIE_REPO } from '../../domain/repositories/movie.repository';
@@ -16,6 +16,8 @@ type FeaturedRails = {
 
 @Injectable()
 export class GetFeaturedMoviesService {
+  private readonly logger = new Logger(GetFeaturedMoviesService.name);
+
   constructor(@Inject(MOVIE_REPO) private readonly repo: MovieRepository) {}
 
   async execute(): Promise<FeaturedRails> {
@@ -28,15 +30,24 @@ export class GetFeaturedMoviesService {
 
     let hero: FeaturedRails['hero'] = null;
 
-    if (heroSummary) {
-      const [detail, assets] = await Promise.all([
-        this.repo.byId(heroSummary.id),
-        this.repo.assets(heroSummary.id),
-      ]);
-      hero = {
-        detail,
-        assets,
-      };
+    if (heroSummary?.id) {
+      try {
+        const [detail, assets] = await Promise.all([
+          this.repo.byId(heroSummary.id),
+          this.repo.assets(heroSummary.id),
+        ]);
+        
+        // ✅ Check ว่า detail มีค่า
+        if (detail) {
+          hero = {
+            detail,
+            assets: assets || null,
+          };
+        }
+      } catch (error) {
+        // ✅ Log แต่ไม่ throw error ให้ API ยังส่ง trending/top/now ได้
+        this.logger.warn(`Failed to fetch hero movie ${heroSummary.id}:`, error);
+      }
     }
 
     return { hero, trending, top, now };

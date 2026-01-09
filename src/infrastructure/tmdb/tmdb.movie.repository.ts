@@ -78,9 +78,10 @@ export class TmdbMovieRepository implements MovieRepository {
   constructor(private readonly tmdb: TmdbClient) {}
 
   async trending(): Promise<MovieSummary[]> {
-    const data =
-      await this.tmdb.get<TmdbMovieSummaryResponse>('/trending/all/week');
-    return (data.results ?? []).map(toMovieSummary);
+    const response = await this.tmdb.get<TmdbMovieSummaryResponse>(
+      '/trending/movie/week', // ← เปลี่ยนจาก /trending/all/week
+    );
+    return (response.results ?? []).map(toMovieSummary);
   }
 
   async topRated(): Promise<MovieSummary[]> {
